@@ -1,0 +1,26 @@
+-- Altera Memory Initialization File (MIF)
+
+DEPTH = 2048;
+WIDTH = 16;
+
+ADDRESS_RADIX = HEX;
+DATA_RADIX = HEX;
+
+CONTENT
+  BEGIN
+    [000..7FF] : 0000;  -- Default to NOP
+
+           000 : 080C;  -- 	LOAD	PWMBackward
+           001 : 98F2;  -- 	OUT		PWM
+           002 : 8006;  -- 	CALL	Delay
+           003 : 9006;  -- 	IN		RPM
+           004 : 9804;  -- 	OUT		HEX0
+           005 : 2800;  -- 	JUMP	Start
+           006 : 9802;  -- 	OUT    Timer
+           007 : 9002;  -- 	IN     Timer
+           008 : 6FEC;  -- 	ADDI   -20
+           009 : 3007;  -- 	JNEG   WaitingLoop
+           00A : 8800;  -- 	RETURN
+           00B : 002F;  -- PWMForward:		DW &B0000000000101111
+           00C : 001F;  -- PWMBackward:	DW &B0000000000011111
+  END;

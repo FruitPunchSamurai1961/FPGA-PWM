@@ -1,0 +1,65 @@
+LIBRARY IEEE;
+LIBRARY LPM;
+
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.STD_LOGIC_ARITH.ALL;
+USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+USE LPM.LPM_COMPONENTS.ALL;
+
+
+ENTITY position_control IS
+    PORT(CLK,
+        RESETN,
+        CS          : IN 	 STD_LOGIC;
+        Position    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  IO_WRITE    : IN    STD_LOGIC;
+		  IO_DATA     : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0)
+    );
+END position_control;
+
+ARCHITECTURE a OF position_control IS
+	SIGNAL	desiredPosition : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	SIGNAL	currentPosition : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	SIGNAL	moveToMake		 : STD_LOGIC_VECTOR(15 DOWNTO 0);
+	
+	SIGNAL IO_OUT    : STD_LOGIC;
+
+	
+	BEGIN
+	IO_BUS: lpm_bustri
+	GENERIC MAP (
+		lpm_width => 16
+	)
+	PORT MAP (
+		data     => moveToMake,
+		enabledt => IO_OUT,
+		tridata  => IO_DATA
+	);
+	
+	IO_OUT <= (CS AND NOT(IO_WRITE));
+	
+   IO_Handler: PROCESS (RESETN, CS)
+    BEGIN
+        IF (RESETN = '0') THEN
+            desiredPosition <= x"0000";
+        ELSIF ( (CS AND IO_WRITE) = '1') THEN --On an OUT, we take in whatever value was put on the bus
+            desiredPosition <= IO_DATA(15 DOWNTO 0);
+        END IF;
+
+    END PROCESS;
+	
+	PROCESS(RESETN,CLK)
+	BEGIN
+		IF RISING_EDGE(CLK) THEN
+		currentPosition <= Position;
+			-- We keep getting the position from the Quadrature Decoder and calculating whether to go forward or backwards or stay put. 
+			IF desiredPosition - 12 <= currentPosition AND currentPosition <= desiredPosition + 12 THEN
+				moveToMake <= x"0000";
+			ELSIF desiredPosition + 12 < currentPosition THEN
+					moveToMake <= "0000000000010111";			
+			ELSE
+					moveToMake <= x"1111";
+			END IF;
+		END IF;
+	END PROCESS;
+END a;

@@ -1,0 +1,80 @@
+-- Altera Memory Initialization File (MIF)
+
+DEPTH = 2048;
+WIDTH = 16;
+
+ADDRESS_RADIX = HEX;
+DATA_RADIX = HEX;
+
+CONTENT
+  BEGIN
+    [000..7FF] : 0000;  -- Default to NOP
+
+           000 : 800A;  -- 	CALL	GetPositionA
+           001 : 8026;  -- 	CALL	PerformPositionControl
+           002 : 8034;  -- 	CALL	DisplayQD
+           003 : 8012;  -- 	CALL	GetPositionB
+           004 : 8026;  -- 	CALL	PerformPositionControl
+           005 : 8034;  -- 	CALL	DisplayQD
+           006 : 801A;  -- 	CALL	GetTimeInput
+           007 : 802C;  -- 	CALL	PerformVelocityControl
+           008 : 8037;  -- 	CALL	DisplayRPM
+           009 : 2833;  -- 	JUMP	Done
+           00A : 9007;  -- 	IN		Key1
+           00B : 4842;  -- 	AND		Bit0
+           00C : 380E;  -- 	JPOS	InputPositionA
+           00D : 280A;  -- 	JUMP	GetPositionA
+           00E : 9000;  -- 	IN		Switches
+           00F : 103D;  -- 	STORE	PosA
+           010 : 9809;  -- 	OUT		PositionCont
+           011 : 8800;  -- 	RETURN
+           012 : 9007;  -- 	IN		Key1
+           013 : 4842;  -- 	AND		Bit0
+           014 : 3816;  -- 	JPOS	InputPositionB
+           015 : 2812;  -- 	JUMP	GetPositionB
+           016 : 9000;  -- 	IN		Switches
+           017 : 103E;  -- 	STORE	PosB
+           018 : 9809;  -- 	OUT		PositionCont
+           019 : 8800;  -- 	RETURN
+           01A : 9007;  -- 	IN		Key1
+           01B : 4842;  -- 	AND		Bit0
+           01C : 381E;  -- 	JPOS	InputTime
+           01D : 281A;  -- 	JUMP	GetTimeInput
+           01E : 9000;  -- 	IN		Switches
+           01F : 1040;  -- 	STORE	Time
+           020 : 083E;  -- 	LOAD	PosB
+           021 : 203D;  -- 	SUB		PosA
+           022 : 1041;  -- 	STORE	Dist
+           023 : 2824;  -- 	JUMP	CalcVelc
+           024 : 0000;  -- 	NOP
+           025 : 8800;  -- 	RETURN	
+           026 : 9009;  -- 	IN		PositionCont
+           027 : 9804;  -- 	OUT		HEX0
+           028 : 98F2;  -- 	OUT		PWM
+           029 : 3826;  -- 	JPOS	PerformPositionControl
+           02A : 3026;  -- 	JNEG	PerformPositionControl
+           02B : 8800;  -- 	RETURN
+           02C : 9008;  -- 	IN		VelocityCont
+           02D : 9804;  -- 	OUT		HEX0
+           02E : 9008;  -- 	IN		VelocityCont
+           02F : 98F2;  -- 	OUT		PWM
+           030 : 382C;  -- 	JPOS	PerformVelocityControl
+           031 : 302C;  -- 	JNEG	PerformVelocityControl
+           032 : 8800;  -- 	RETURN
+           033 : 2833;  -- 	JUMP	Done
+           034 : 90F1;  -- 	IN		QD
+           035 : 9804;  -- 	OUT		HEX0
+           036 : 8800;  -- 	RETURN
+           037 : 9006;  -- 	IN		RPM
+           038 : 9804;  -- 	OUT		HEX0
+           039 : 8800;  -- 	RETURN
+           03A : 9009;  -- 	IN		PositionCont
+           03B : 9804;  -- 	OUT		HEX0
+           03C : 8800;  -- 	RETURN
+           03D : 0000;  -- PosA:	DW	0
+           03E : 0000;  -- PosB:	DW	0
+           03F : 0000;  -- Velc:	DW	0
+           040 : 0000;  -- Time:	DW  0
+           041 : 0000;  -- Dist:	DW	0
+           042 : 0001;  -- Bit0:   DW &B0000000001
+  END;
